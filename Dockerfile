@@ -8,6 +8,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY vcht-bot.py .
 
-ENV DISCORD_TOKEN=""
-
-CMD ["python", "vcht-bot.py"]
+CMD python vcht-bot.py
