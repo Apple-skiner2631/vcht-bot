@@ -2,8 +2,12 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-RUN pip install --no-cache-dir discord.py
+COPY requirements.txt .
 
-COPY . .
+RUN pip install --no-cache-dir -r requirements.txt
 
-CMD ["python", "bot.py"]
+COPY vcht-bot.py .
+
+ENV DISCORD_TOKEN=""
+
+CMD ["python", "vcht-bot.py"]
