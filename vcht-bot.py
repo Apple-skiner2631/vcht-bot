@@ -4,7 +4,7 @@ import discord
 from discord.ext import commands
 from discord.ui import View, Button, Modal, TextInput, Select, UserSelect
 
-TRIGGER_CHANNEL_ID = 1459721784386523206
+TRIGGER_CHANNEL_ID = 1530968575781765120
 CATEGORY_ID = 1459692616076624087
 
 intents = discord.Intents.default()
