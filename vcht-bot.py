@@ -2,7 +2,7 @@ import os
 import asyncio
 import discord
 from discord.ext import commands
-from discord.ui import View, Button, Modal, TextInput, Select
+from discord.ui import View, Button, Modal, TextInput, Select, UserSelect
 
 TRIGGER_CHANNEL_ID = 1459721784386523206
 CATEGORY_ID = 1459692616076624087
@@ -15,6 +15,16 @@ intents.members = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 voice_owners = {}
+
+def is_owner():
+    async def predicate(interaction: discord.Interaction):
+        channel_id = interaction.channel_id
+        owner_id = voice_owners.get(channel_id)
+        if owner_id == interaction.user.id:
+            return True
+        await interaction.response.send_message("❌ 只有此包廂的房主才能使用此選單！", ephemeral=True)
+        return False
+    return discord.app_commands.check(predicate)
 
 class NameModal(Modal, title="修改頻道名稱"):
     channel_name = TextInput(label="新頻道名稱", placeholder="輸入新的語音頻道名稱...", max_length=100)
@@ -59,18 +69,17 @@ class BitrateModal(Modal, title="調整音質 (Bitrate)"):
         except ValueError:
             await interaction.response.send_message("❌ 請輸入有效的數字！", ephemeral=True)
 
-class UserSelectView(View):
+class UserSelectMenu(UserSelect):
     def __init__(self, action_type: str, owner_id: int):
-        super().__init__(timeout=60)
+        super().__init__(placeholder="請選擇成員...", min_values=1, max_values=1)
         self.action_type = action_type
         self.owner_id = owner_id
 
-    @discord.ui.select(cls=Select, select_type=discord.ComponentType.user_select, placeholder="請選擇成員...")
-    async def select_user(self, interaction: discord.Interaction, select: Select):
+    async def callback(self, interaction: discord.Interaction):
         if interaction.user.id != self.owner_id:
             return await interaction.response.send_message("❌ 只有房主可以使用此選單！", ephemeral=True)
 
-        target_member = select.values[0]
+        target_member = self.values[0]
         channel = interaction.channel
 
         if self.action_type == "permit":
@@ -91,6 +100,11 @@ class UserSelectView(View):
             await channel.set_permissions(target_member, manage_channels=True, move_members=True)
             await channel.set_permissions(interaction.user, overwrite=None)
             await interaction.response.send_message(f"👑 房主權限已轉移給 {target_member.mention}！")
+
+class UserSelectView(View):
+    def __init__(self, action_type: str, owner_id: int):
+        super().__init__(timeout=60)
+        self.add_item(UserSelectMenu(action_type=action_type, owner_id=owner_id))
 
 class ChannelSettingsSelect(Select):
     def __init__(self):
