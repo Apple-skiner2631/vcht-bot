@@ -315,7 +315,7 @@ async def on_voice_state_update(member: discord.Member, before: discord.VoiceSta
             return
 
         new_channel = await guild.create_voice_channel(
-            name=f"{member.display_name} 的包廂",
+            name=f"{member.display_name} 的語音頻道",
             category=category,
             position=len(category.channels)
         )
