@@ -20,16 +20,16 @@ voice_owners = {}
 
 E_MENU_SETTINGS = discord.PartialEmoji(name="menu_settings", id=1531236010413920276)
 
-E_NAME     = discord.PartialEmoji(name="e_name",     id=1531235954893783070) # 藍色 Name
-E_LIMIT    = discord.PartialEmoji(name="e_limit",    id=1531235983956377742) # 藍色 Limit
-E_STATUS   = discord.PartialEmoji(name="e_status",   id=1531236041736978563) # 藍色 Status
-E_GAME     = discord.PartialEmoji(name="e_game",     id=1531236073768751235) # 黃色 Game
-E_LFM      = discord.PartialEmoji(name="e_lfm",      id=1531236105914159154) # 黃色 LFM
-E_BITRATE  = discord.PartialEmoji(name="e_bitrate",  id=1531236135202848938) # 黃色 Bitrate
-E_REGION   = discord.PartialEmoji(name="e_region",   id=1531236162763620422) # 黃色 Region
-E_TEXT     = discord.PartialEmoji(name="e_text",     id=1531236193503547565) # 黃色 Text (#)
-E_NSFW     = discord.PartialEmoji(name="e_nsfw",     id=1531236231122391133) # 黃色 NSFW (!)
-E_CLAIM    = discord.PartialEmoji(name="e_claim",    id=1531236263338709093) # 藍色 Claim (皇冠)
+E_NAME     = discord.PartialEmoji(name="e_name",     id=1531235954893783070) 
+E_LIMIT    = discord.PartialEmoji(name="e_limit",    id=1531235983956377742)
+E_STATUS   = discord.PartialEmoji(name="e_status",   id=1531236041736978563) 
+E_GAME     = discord.PartialEmoji(name="e_game",     id=1531236073768751235) 
+E_LFM      = discord.PartialEmoji(name="e_lfm",      id=1531236105914159154)
+E_BITRATE  = discord.PartialEmoji(name="e_bitrate",  id=1531236135202848938)
+E_REGION   = discord.PartialEmoji(name="e_region",   id=1531236162763620422) 
+E_TEXT     = discord.PartialEmoji(name="e_text",     id=1531236193503547565)
+E_NSFW     = discord.PartialEmoji(name="e_nsfw",     id=1531236231122391133) 
+E_CLAIM    = discord.PartialEmoji(name="e_claim",    id=1531236263338709093) 
 
 E_LOCK     = discord.PartialEmoji(name="e_lock",     id=1531237058662633492) 
 E_UNLOCK   = discord.PartialEmoji(name="e_unlock",   id=1531237091264954418) 
