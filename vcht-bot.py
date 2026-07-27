@@ -6,6 +6,7 @@ from discord.ui import View, Button, Modal, TextInput, Select, UserSelect
 
 TRIGGER_CHANNEL_ID = 1530974075902759083
 CATEGORY_ID = 1459692616076624087
+STAFF_ROLE_ID = 1459696673239470338
 
 intents = discord.Intents.default()
 intents.voice_states = True
@@ -16,15 +17,34 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 voice_owners = {}
 
-def is_owner():
-    async def predicate(interaction: discord.Interaction):
-        channel_id = interaction.channel_id
-        owner_id = voice_owners.get(channel_id)
-        if owner_id == interaction.user.id:
-            return True
-        await interaction.response.send_message("❌ 只有此包廂的房主才能使用此選單！", ephemeral=True)
-        return False
-    return discord.app_commands.check(predicate)
+CUSTOM_EMOJI = discord.PartialEmoji(name="custom_icon", id=1531235954893783070)
+
+
+def is_authorized(member: discord.Member, channel_id: int) -> bool:
+    owner_id = voice_owners.get(channel_id)
+    if member.id == owner_id:
+        return True
+    if member.guild_permissions.manage_channels:
+        return True
+    if any(role.id == STAFF_ROLE_ID for role in member.roles):
+        return True
+    return False
+
+
+class DeleteTextChannelView(View):
+    def __init__(self, owner_id: int):
+        super().__init__(timeout=None)
+        self.owner_id = owner_id
+
+    @discord.ui.button(label="刪除頻道", style=discord.ButtonStyle.danger, emoji="🗑️")
+    async def delete_channel(self, interaction: discord.Interaction, button: Button):
+        if not is_authorized(interaction.user, interaction.channel.id) and interaction.user.id != self.owner_id:
+            return await interaction.response.send_message("❌ 只有房主或管理人員才能刪除此文字頻道！", ephemeral=True)
+        
+        await interaction.response.send_message("🗑️ 專屬文字頻道即將刪除...", ephemeral=True)
+        await asyncio.sleep(1)
+        await interaction.channel.delete()
+
 
 class NameModal(Modal, title="修改頻道名稱"):
     channel_name = TextInput(label="新頻道名稱", placeholder="輸入新的語音頻道名稱...", max_length=100)
@@ -32,6 +52,7 @@ class NameModal(Modal, title="修改頻道名稱"):
     async def on_submit(self, interaction: discord.Interaction):
         await interaction.channel.edit(name=self.channel_name.value)
         await interaction.response.send_message(f"✅ 頻道名稱已修改為：**{self.channel_name.value}**", ephemeral=True)
+
 
 class LimitModal(Modal, title="設定人數限制"):
     user_limit = TextInput(label="人數限制 (0 為無限制，上限 99)", placeholder="0", max_length=2)
@@ -47,12 +68,14 @@ class LimitModal(Modal, title="設定人數限制"):
         except ValueError:
             await interaction.response.send_message("❌ 請輸入有效的數字！", ephemeral=True)
 
+
 class StatusModal(Modal, title="設定頻道狀態"):
     status_text = TextInput(label="頻道狀態", placeholder="輸入目前的狀態文字...", max_length=50)
 
     async def on_submit(self, interaction: discord.Interaction):
         await interaction.channel.edit(status=self.status_text.value)
         await interaction.response.send_message(f"✅ 頻道狀態已更新為：**{self.status_text.value}**", ephemeral=True)
+
 
 class BitrateModal(Modal, title="調整音質 (位元率)"):
     bitrate_kbps = TextInput(label="位元率 (kbps, 預設 64, 最高 96/128/256/384)", placeholder="64", max_length=3)
@@ -69,6 +92,7 @@ class BitrateModal(Modal, title="調整音質 (位元率)"):
         except ValueError:
             await interaction.response.send_message("❌ 請輸入有效的數字！", ephemeral=True)
 
+
 class UserSelectMenu(UserSelect):
     def __init__(self, action_type: str, owner_id: int):
         super().__init__(placeholder="請選擇成員...", min_values=1, max_values=1)
@@ -76,8 +100,8 @@ class UserSelectMenu(UserSelect):
         self.owner_id = owner_id
 
     async def callback(self, interaction: discord.Interaction):
-        if interaction.user.id != self.owner_id:
-            return await interaction.response.send_message("❌ 只有房主可以使用此選單！", ephemeral=True)
+        if not is_authorized(interaction.user, interaction.channel.id):
+            return await interaction.response.send_message("❌ 只有房主或管理人員可以使用此選單！", ephemeral=True)
 
         target_member = self.values[0]
         channel = interaction.channel
@@ -93,7 +117,7 @@ class UserSelectMenu(UserSelect):
             await interaction.response.send_message(f"🚫 已封鎖並踢出 {target_member.mention}。", ephemeral=True)
 
         elif self.action_type == "invite":
-            await interaction.response.send_message(f"📩 {target_member.mention}，房主 {interaction.user.mention} 邀請你加入頻道：{channel.mention}")
+            await interaction.response.send_message(f"📩 {target_member.mention}，{interaction.user.mention} 邀請你加入頻道：{channel.mention}")
 
         elif self.action_type == "transfer":
             voice_owners[channel.id] = target_member.id
@@ -101,15 +125,17 @@ class UserSelectMenu(UserSelect):
             await channel.set_permissions(interaction.user, overwrite=None)
             await interaction.response.send_message(f"👑 房主權限已轉移給 {target_member.mention}！")
 
+
 class UserSelectView(View):
     def __init__(self, action_type: str, owner_id: int):
         super().__init__(timeout=60)
         self.add_item(UserSelectMenu(action_type=action_type, owner_id=owner_id))
 
+
 class ChannelSettingsSelect(Select):
     def __init__(self):
         options = [
-            discord.SelectOption(label="修改名稱", description="變更語音頻道的名稱", emoji="✏️", value="name"),
+            discord.SelectOption(label="修改名稱", description="變更語音頻道的名稱", emoji=CUSTOM_EMOJI, value="name"),
             discord.SelectOption(label="人數限制", description="設定頻道的最大容納人數", emoji="👥", value="limit"),
             discord.SelectOption(label="頻道狀態", description="設定頻道的自訂狀態文字", emoji="💬", value="status"),
             discord.SelectOption(label="遊戲主題", description="自動將頻道名稱改為你正在玩的遊戲", emoji="🎮", value="game"),
@@ -120,7 +146,7 @@ class ChannelSettingsSelect(Select):
             discord.SelectOption(label="年齡分級", description="切換頻道的 NSFW (限制級) 狀態", emoji="⚠️", value="nsfw"),
             discord.SelectOption(label="轉移房主", description="接管目前無人管理的頻道房主權限", emoji="👑", value="claim"),
         ]
-        super().__init__(placeholder="⚙️ 頻道設定", min_values=1, max_values=1, options=options)
+        super().__init__(placeholder="⚙️ 頻道設定 (Channel Settings)", min_values=1, max_values=1, options=options, row=0)
 
     async def callback(self, interaction: discord.Interaction):
         channel = interaction.channel
@@ -133,8 +159,8 @@ class ChannelSettingsSelect(Select):
             await interaction.response.send_message(f"👑 {interaction.user.mention} 已成功轉移並成為此包廂的新房主！")
             return
 
-        if interaction.user.id != owner_id:
-            return await interaction.response.send_message("❌ 只有此包廂的房主才能進行設定！", ephemeral=True)
+        if not is_authorized(interaction.user, channel.id):
+            return await interaction.response.send_message("❌ 只有房主或管理人員才能進行設定！", ephemeral=True)
 
         selected = self.values[0]
         if selected == "name":
@@ -156,14 +182,48 @@ class ChannelSettingsSelect(Select):
             await interaction.response.send_modal(BitrateModal())
         elif selected == "region":
             await interaction.response.send_message("ℹ️ 目前伺服器由 Discord 自動指派最佳語音區域。", ephemeral=True)
+        
         elif selected == "text":
-            text_channel = await interaction.guild.create_text_channel(name=f"💬-{channel.name}", category=channel.category)
+            staff_role = interaction.guild.get_role(STAFF_ROLE_ID)
+            overwrites = {
+                interaction.guild.default_role: discord.PermissionOverwrite(read_messages=False),
+                interaction.user: discord.PermissionOverwrite(read_messages=True, send_messages=True)
+            }
+            if staff_role:
+                overwrites[staff_role] = discord.PermissionOverwrite(read_messages=True, send_messages=True)
+
+            for member in channel.members:
+                overwrites[member] = discord.PermissionOverwrite(read_messages=True, send_messages=True)
+
+            text_channel = await interaction.guild.create_text_channel(
+                name=f"💬-{channel.name}",
+                category=channel.category,
+                overwrites=overwrites
+            )
+
+            welcome_embed = discord.Embed(
+                title=f"💬 {channel.name} - 專屬討論空間",
+                description=(
+                    f"歡迎來到專屬文字頻道 {text_channel.mention}！\n\n"
+                    "📌 **說明：**\n"
+                    "• 此頻道為此語音包廂的臨時文字討論區。\n"
+                    "• 點擊下方按鈕可由房主或管理員隨時手動刪除此文字頻道。"
+                ),
+                color=discord.Color.green()
+            )
+            welcome_embed.set_footer(text=f"房主：{interaction.user.display_name}", icon_url=interaction.user.display_avatar.url)
+
+            delete_view = DeleteTextChannelView(owner_id=interaction.user.id)
+            await text_channel.send(embed=welcome_embed, view=delete_view)
+
             await interaction.response.send_message(f"✅ 已為您建立專屬文字頻道：{text_channel.mention}", ephemeral=True)
+
         elif selected == "nsfw":
             is_nsfw = not channel.nsfw
             await channel.edit(nsfw=is_nsfw)
             status_msg = "已開啟 (NSFW)" if is_nsfw else "已關閉 (SFW)"
             await interaction.response.send_message(f"✅ 頻道分級已更新為：**{status_msg}**", ephemeral=True)
+
 
 class ChannelPermissionsSelect(Select):
     def __init__(self):
@@ -171,20 +231,20 @@ class ChannelPermissionsSelect(Select):
             discord.SelectOption(label="上鎖頻道", description="上鎖頻道，禁止其他成員隨意加入", emoji="🔒", value="lock"),
             discord.SelectOption(label="解鎖頻道", description="解鎖頻道，允許所有人加入", emoji="🔓", value="unlock"),
             discord.SelectOption(label="允許成員", description="允許指定成員查看與加入頻道", emoji="👤", value="permit"),
-            discord.SelectOption(label="踢出/封鎖", description="封鎖指定成員並將其踢出頻道", emoji="👤", value="reject"),
-            discord.SelectOption(label="邀請成員", description="發送邀請給指定成員加入頻道", emoji="👥", value="invite"),
-            discord.SelectOption(label="隱藏頻道", description="讓頻道對其他人不可見 (隱身模式)", emoji="❌", value="ghost"),
+            discord.SelectOption(label="踢出/封鎖", description="封鎖指定成員並將其踢出頻道", emoji="🚫", value="reject"),
+            discord.SelectOption(label="邀請成員", description="發送邀請給指定成員加入頻道", emoji="📩", value="invite"),
+            discord.SelectOption(label="隱藏頻道", description="讓頻道對其他人不可見 (隱身模式)", emoji="👻", value="ghost"),
             discord.SelectOption(label="取消隱藏", description="讓頻道恢復公開顯示", emoji="⭕", value="unghost"),
             discord.SelectOption(label="讓渡房主", description="將房主管理權限轉移給其他成員", emoji="👑", value="transfer"),
         ]
-        super().__init__(placeholder="🔒 頻道權限", min_values=1, max_values=1, options=options)
+        super().__init__(placeholder="🔒 頻道權限 (Channel Permissions)", min_values=1, max_values=1, options=options, row=1)
 
     async def callback(self, interaction: discord.Interaction):
         channel = interaction.channel
         owner_id = voice_owners.get(channel.id)
 
-        if interaction.user.id != owner_id:
-            return await interaction.response.send_message("❌ 只有此包廂的房主才能設定權限！", ephemeral=True)
+        if not is_authorized(interaction.user, channel.id):
+            return await interaction.response.send_message("❌ 只有房主或管理人員才能設定權限！", ephemeral=True)
 
         selected = self.values[0]
         guild = interaction.guild
@@ -197,7 +257,7 @@ class ChannelPermissionsSelect(Select):
             await interaction.response.send_message("🔓 頻道已解鎖，所有成員皆可加入。", ephemeral=True)
         elif selected == "ghost":
             await channel.set_permissions(guild.default_role, view_channel=False)
-            await interaction.response.send_message("❌ 頻道已隱藏 (隱身模式)。", ephemeral=True)
+            await interaction.response.send_message("👻 頻道已隱藏 (隱身模式)。", ephemeral=True)
         elif selected == "unghost":
             await channel.set_permissions(guild.default_role, view_channel=None)
             await interaction.response.send_message("⭕ 頻道已解除隱藏，公開顯示。", ephemeral=True)
@@ -211,15 +271,18 @@ class ChannelPermissionsSelect(Select):
             view = UserSelectView(action_type=selected, owner_id=owner_id)
             await interaction.response.send_message(f"請選擇要進行 **{action_names[selected]}** 操作的成員：", view=view, ephemeral=True)
 
+
 class ControlPanelView(View):
     def __init__(self):
         super().__init__(timeout=None)
         self.add_item(ChannelSettingsSelect())
         self.add_item(ChannelPermissionsSelect())
 
+
 @bot.event
 async def on_ready():
     print(f"機器人已成功登入為 {bot.user}")
+
 
 @bot.event
 async def on_voice_state_update(member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
@@ -241,13 +304,14 @@ async def on_voice_state_update(member: discord.Member, before: discord.VoiceSta
         await member.move_to(new_channel)
 
         embed = discord.Embed(
-            title="🎤 歡迎來到你的獨立語音頻道！",
+            title="🎉 歡迎來到你的獨立語音頻道！",
             description=(
                 f"你好 {member.mention}！這是專屬於你的私人語音空間。\n"
                 "你可以透過下方選單輕鬆管理你的頻道名稱、人數限制、進出權限等設定。\n\n"
-                "**📌 快捷選單說明：**\n"
-                "🔹 **頻道設定**：修改名稱、人數上限、狀態、遊戲主題、音質等。\n"
-                "🔹 **頻道權限**：鎖定頻道、隱藏頻道、允許/踢出指定成員、轉移房主等。"
+                "** Channel Settings**\n"
+                "└ 修改名稱、人數上限、狀態、遊戲主題、音質、專屬文字房等。\n\n"
+                "** Channel Permissions**\n"
+                "└ 鎖定頻道、隱藏頻道、允許/踢出指定成員、轉移房主等。"
             ),
             color=discord.Color.blue()
         )
@@ -267,6 +331,7 @@ async def on_voice_state_update(member: discord.Member, before: discord.VoiceSta
                         del voice_owners[channel_id]
                 except discord.NotFound:
                     pass
+
 
 if __name__ == "__main__":
     token = os.getenv("DISCORD_TOKEN")
