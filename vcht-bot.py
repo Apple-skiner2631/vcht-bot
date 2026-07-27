@@ -17,10 +17,9 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 voice_owners = {}
 
-# --- 選單標題專用 Emoji ---
-E_MENU_SETTINGS = discord.PartialEmoji(name="menu_settings", id=1531236010413920276) # 藍色齒輪 (選單標題)
 
-# --- 根據截圖實測比對出的 18 個選項 Emoji ID ---
+E_MENU_SETTINGS = discord.PartialEmoji(name="menu_settings", id=1531236010413920276)
+
 E_NAME     = discord.PartialEmoji(name="e_name",     id=1531235954893783070) # 藍色 Name
 E_LIMIT    = discord.PartialEmoji(name="e_limit",    id=1531235983956377742) # 藍色 Limit
 E_STATUS   = discord.PartialEmoji(name="e_status",   id=1531236041736978563) # 藍色 Status
@@ -30,14 +29,14 @@ E_BITRATE  = discord.PartialEmoji(name="e_bitrate",  id=1531236135202848938) # �
 E_REGION   = discord.PartialEmoji(name="e_region",   id=1531236162763620422) # 黃色 Region
 E_TEXT     = discord.PartialEmoji(name="e_text",     id=1531236193503547565) # 黃色 Text (#)
 E_NSFW     = discord.PartialEmoji(name="e_nsfw",     id=1531236231122391133) # 黃色 NSFW (!)
-E_CLAIM    = discord.PartialEmoji(name="e_claim",    id=1531237261205573654) # 藍色 Claim (皇冠)
+E_CLAIM    = discord.PartialEmoji(name="e_claim",    id=1531236263338709093) # 藍色 Claim (皇冠)
 
-E_LOCK     = discord.PartialEmoji(name="e_lock",     id=1531236263338709093) # 藍色 Lock (鎖頭)
-E_UNLOCK   = discord.PartialEmoji(name="e_unlock",   id=1531237058662633492) # 藍色 Unlock
-E_PERMIT   = discord.PartialEmoji(name="e_permit",   id=1531237091264954418) # 藍色 Permit
-E_REJECT   = discord.PartialEmoji(name="e_reject",   id=1531237123514961931) # 藍色 Reject
-E_INVITE   = discord.PartialEmoji(name="e_invite",   id=1531237152736678089) # 黃色 Invite
-E_GHOST    = discord.PartialEmoji(name="e_ghost",    id=1531237201780805723) # 黃色 Ghost
+E_LOCK     = discord.PartialEmoji(name="e_lock",     id=1531237058662633492) # 藍色 Lock (鎖頭)
+E_UNLOCK   = discord.PartialEmoji(name="e_unlock",   id=1531237091264954418) # 藍色 Unlock
+E_PERMIT   = discord.PartialEmoji(name="e_permit",   id=1531237123514961931) # 藍色 Permit
+E_REJECT   = discord.PartialEmoji(name="e_reject",   id=1531237152736678089) # 藍色 Reject
+E_INVITE   = discord.PartialEmoji(name="e_invite",   id=1531237201780805723) # 黃色 Invite
+E_GHOST    = discord.PartialEmoji(name="e_ghost",    id=1531237261205573654) # 黃色 Ghost
 E_UNGHOST  = discord.PartialEmoji(name="e_unghost",  id=1531237228905496826) # 黃色 Unghost
 E_TRANSFER = discord.PartialEmoji(name="e_transfer", id=1531237291639439492) # 黃色 Transfer (皇冠)
 
