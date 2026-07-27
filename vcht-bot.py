@@ -31,14 +31,14 @@ E_TEXT     = discord.PartialEmoji(name="e_text",     id=1531236193503547565) # �
 E_NSFW     = discord.PartialEmoji(name="e_nsfw",     id=1531236231122391133) # 黃色 NSFW (!)
 E_CLAIM    = discord.PartialEmoji(name="e_claim",    id=1531236263338709093) # 藍色 Claim (皇冠)
 
-E_LOCK     = discord.PartialEmoji(name="e_lock",     id=1531237058662633492) # 藍色 Lock (鎖頭)
-E_UNLOCK   = discord.PartialEmoji(name="e_unlock",   id=1531237091264954418) # 藍色 Unlock
-E_PERMIT   = discord.PartialEmoji(name="e_permit",   id=1531237123514961931) # 藍色 Permit
-E_REJECT   = discord.PartialEmoji(name="e_reject",   id=1531237152736678089) # 藍色 Reject
-E_INVITE   = discord.PartialEmoji(name="e_invite",   id=1531237201780805723) # 黃色 Invite
-E_GHOST    = discord.PartialEmoji(name="e_ghost",    id=1531237261205573654) # 黃色 Ghost
-E_UNGHOST  = discord.PartialEmoji(name="e_unghost",  id=1531237228905496826) # 黃色 Unghost
-E_TRANSFER = discord.PartialEmoji(name="e_transfer", id=1531237291639439492) # 黃色 Transfer (皇冠)
+E_LOCK     = discord.PartialEmoji(name="e_lock",     id=1531237058662633492) 
+E_UNLOCK   = discord.PartialEmoji(name="e_unlock",   id=1531237091264954418) 
+E_PERMIT   = discord.PartialEmoji(name="e_permit",   id=1531237123514961931) 
+E_REJECT   = discord.PartialEmoji(name="e_reject",   id=1531237152736678089)
+E_INVITE   = discord.PartialEmoji(name="e_invite",   id=1531237201780805723)
+E_GHOST    = discord.PartialEmoji(name="e_ghost",    id=1531237261205573654)
+E_UNGHOST  = discord.PartialEmoji(name="e_unghost",  id=1531237228905496826)
+E_TRANSFER = discord.PartialEmoji(name="e_transfer", id=1531237291639439492)
 
 
 def is_authorized(member: discord.Member, channel_id: int) -> bool:
@@ -325,13 +325,13 @@ async def on_voice_state_update(member: discord.Member, before: discord.VoiceSta
         await member.move_to(new_channel)
 
         embed = discord.Embed(
-            title="🎤 語音包廂管理控制面板",
+            title="🔊 歡迎來到你的專屬語音頻道",
             description=(
-                f"歡迎 {member.mention}！使用下方選單調整頻道設定：\n"
-                "───────────────────────────\n"
-                "**Channel Settings**\n\n"
-                "───────────────────────────\n"
-                "**Channel Permissions**"
+                f"你好 {member.mention}！\n 使用下方選單調整頻道設定：\n"
+                "──────────────────────────\n"
+                "**頻道設定[Channel Settings]**\n\n"
+                "──────────────────────────\n"
+                "**頻道權限[Channel Permissions]**"
             ),
             color=discord.Color.from_rgb(47, 49, 54)
         )
