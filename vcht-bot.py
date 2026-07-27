@@ -17,7 +17,28 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 voice_owners = {}
 
-CUSTOM_EMOJI = discord.PartialEmoji(name="custom_icon", id=1531235954893783070)
+# --- 選單標題專用 Emoji ---
+E_MENU_SETTINGS = discord.PartialEmoji(name="menu_settings", id=1531236010413920276) # 藍色齒輪
+
+# --- 18 個選項 Emoji (藍色鎖頭歸位至 E_11 上鎖頻道，其餘精準對齊) ---
+E_01 = discord.PartialEmoji(name="e01", id=1531235954893783070) # 修改名稱
+E_02 = discord.PartialEmoji(name="e02", id=1531235983956377742) # 人數限制
+E_03 = discord.PartialEmoji(name="e03", id=1531236041736978563) # 頻道狀態
+E_04 = discord.PartialEmoji(name="e04", id=1531236073768751235) # 遊戲主題
+E_05 = discord.PartialEmoji(name="e05", id=1531236105914159154) # 組隊尋人
+E_06 = discord.PartialEmoji(name="e06", id=1531236135202848938) # 調整音質
+E_07 = discord.PartialEmoji(name="e07", id=1531236162763620422) # 語音區域
+E_08 = discord.PartialEmoji(name="e08", id=1531236193503547565) # 專屬文字房
+E_09 = discord.PartialEmoji(name="e09", id=1531236231122391133) # 年齡分級
+E_10 = discord.PartialEmoji(name="e10", id=1531237058662633492) # 聲明/接管房主
+E_11 = discord.PartialEmoji(name="e11", id=1531236263338709093) # 上鎖頻道 (藍色鎖頭)
+E_12 = discord.PartialEmoji(name="e12", id=1531237091264954418) # 解鎖頻道
+E_13 = discord.PartialEmoji(name="e13", id=1531237123514961931) # 允許成員
+E_14 = discord.PartialEmoji(name="e14", id=1531237152736678089) # 踢出/封鎖
+E_15 = discord.PartialEmoji(name="e15", id=1531237201780805723) # 邀請成員
+E_16 = discord.PartialEmoji(name="e16", id=1531237291639439492) # 隱藏頻道
+E_17 = discord.PartialEmoji(name="e17", id=1531237228905496826) # 取消隱藏
+E_18 = discord.PartialEmoji(name="e18", id=1531237261205573654) # 讓渡房主
 
 
 def is_authorized(member: discord.Member, channel_id: int) -> bool:
@@ -135,17 +156,18 @@ class UserSelectView(View):
 class ChannelSettingsSelect(Select):
     def __init__(self):
         options = [
-            discord.SelectOption(label="修改名稱", description="變更語音頻道的名稱", emoji=CUSTOM_EMOJI, value="name"),
-            discord.SelectOption(label="人數限制", description="設定頻道的最大容納人數", emoji="👥", value="limit"),
-            discord.SelectOption(label="頻道狀態", description="設定頻道的自訂狀態文字", emoji="💬", value="status"),
-            discord.SelectOption(label="遊戲主題", description="自動將頻道名稱改為你正在玩的遊戲", emoji="🎮", value="game"),
-            discord.SelectOption(label="組隊尋人", description="發送尋找隊友的訊息通知", emoji="🔍", value="lfm"),
-            discord.SelectOption(label="調整音質", description="修改頻道的位元率 (Bitrate)", emoji="🎛️", value="bitrate"),
-            discord.SelectOption(label="語音區域", description="查看語音伺服器區域資訊", emoji="🌐", value="region"),
-            discord.SelectOption(label="專屬文字房", description="建立臨時的專屬文字頻道", emoji="💬", value="text"),
-            discord.SelectOption(label="年齡分級", description="切換頻道的 NSFW (限制級) 狀態", emoji="⚠️", value="nsfw"),
-            discord.SelectOption(label="轉移房主", description="接管目前無人管理的頻道房主權限", emoji="👑", value="claim"),
+            discord.SelectOption(label="修改名稱", description="變更語音頻道的名稱", emoji=E_01, value="name"),
+            discord.SelectOption(label="人數限制", description="設定頻道的最大容納人數", emoji=E_02, value="limit"),
+            discord.SelectOption(label="頻道狀態", description="設定頻道的自訂狀態文字", emoji=E_03, value="status"),
+            discord.SelectOption(label="遊戲主題", description="自動將頻道名稱改為你正在玩的遊戲", emoji=E_04, value="game"),
+            discord.SelectOption(label="組隊尋人", description="發送尋找隊友的訊息通知", emoji=E_05, value="lfm"),
+            discord.SelectOption(label="調整音質", description="修改頻道的位元率 (Bitrate)", emoji=E_06, value="bitrate"),
+            discord.SelectOption(label="語音區域", description="查看語音伺服器區域資訊", emoji=E_07, value="region"),
+            discord.SelectOption(label="專屬文字房", description="建立臨時的專屬文字頻道", emoji=E_08, value="text"),
+            discord.SelectOption(label="年齡分級", description="切換頻道的 NSFW (限制級) 狀態", emoji=E_09, value="nsfw"),
+            discord.SelectOption(label="聲明房主", description="接管目前無人管理的頻道房主權限", emoji=E_10, value="claim"),
         ]
+        # 使用藍色齒輪作為 Placeholder 前綴選單名稱
         super().__init__(placeholder="⚙️ 頻道設定 (Channel Settings)", min_values=1, max_values=1, options=options, row=0)
 
     async def callback(self, interaction: discord.Interaction):
@@ -228,15 +250,16 @@ class ChannelSettingsSelect(Select):
 class ChannelPermissionsSelect(Select):
     def __init__(self):
         options = [
-            discord.SelectOption(label="上鎖頻道", description="上鎖頻道，禁止其他成員隨意加入", emoji="🔒", value="lock"),
-            discord.SelectOption(label="解鎖頻道", description="解鎖頻道，允許所有人加入", emoji="🔓", value="unlock"),
-            discord.SelectOption(label="允許成員", description="允許指定成員查看與加入頻道", emoji="👤", value="permit"),
-            discord.SelectOption(label="踢出/封鎖", description="封鎖指定成員並將其踢出頻道", emoji="🚫", value="reject"),
-            discord.SelectOption(label="邀請成員", description="發送邀請給指定成員加入頻道", emoji="📩", value="invite"),
-            discord.SelectOption(label="隱藏頻道", description="讓頻道對其他人不可見 (隱身模式)", emoji="👻", value="ghost"),
-            discord.SelectOption(label="取消隱藏", description="讓頻道恢復公開顯示", emoji="⭕", value="unghost"),
-            discord.SelectOption(label="讓渡房主", description="將房主管理權限轉移給其他成員", emoji="👑", value="transfer"),
+            discord.SelectOption(label="上鎖頻道", description="上鎖頻道，禁止其他成員隨意加入", emoji=E_11, value="lock"), # 藍色鎖頭
+            discord.SelectOption(label="解鎖頻道", description="解鎖頻道，允許所有人加入", emoji=E_12, value="unlock"),
+            discord.SelectOption(label="允許成員", description="允許指定成員查看與加入頻道", emoji=E_13, value="permit"),
+            discord.SelectOption(label="踢出/封鎖", description="封鎖指定成員並將其踢出頻道", emoji=E_14, value="reject"),
+            discord.SelectOption(label="邀請成員", description="發送邀請給指定成員加入頻道", emoji=E_15, value="invite"),
+            discord.SelectOption(label="隱藏頻道", description="讓頻道對其他人不可見 (隱身模式)", emoji=E_16, value="ghost"),
+            discord.SelectOption(label="取消隱藏", description="讓頻道恢復公開顯示", emoji=E_17, value="unghost"),
+            discord.SelectOption(label="讓渡房主", description="將房主管理權限轉移給其他成員", emoji=E_18, value="transfer"),
         ]
+        # 頻道權限選單標題使用原版 🔒 Emoji
         super().__init__(placeholder="🔒 頻道權限 (Channel Permissions)", min_values=1, max_values=1, options=options, row=1)
 
     async def callback(self, interaction: discord.Interaction):
@@ -304,19 +327,18 @@ async def on_voice_state_update(member: discord.Member, before: discord.VoiceSta
         await member.move_to(new_channel)
 
         embed = discord.Embed(
-            title="🎉 歡迎來到你的獨立語音頻道！",
+            title="🎤 語音包廂管理控制面板",
             description=(
-                f"你好 {member.mention}！這是專屬於你的私人語音空間。\n"
-                "你可以透過下方選單輕鬆管理你的頻道名稱、人數限制、進出權限等設定。\n\n"
-                "** Channel Settings**\n"
-                "└ 修改名稱、人數上限、狀態、遊戲主題、音質、專屬文字房等。\n\n"
-                "** Channel Permissions**\n"
-                "└ 鎖定頻道、隱藏頻道、允許/踢出指定成員、轉移房主等。"
+                f"歡迎 {member.mention}！使用下方選單調整頻道設定：\n"
+                "───────────────────────────\n"
+                "**Channel Settings**\n\n"
+                "───────────────────────────\n"
+                "**Channel Permissions**"
             ),
-            color=discord.Color.blue()
+            color=discord.Color.from_rgb(47, 49, 54)
         )
         embed.set_thumbnail(url=member.display_avatar.url)
-        embed.set_footer(text="提示：當所有人離開頻道後，系統將會自動清理此空間。")
+        embed.set_footer(text="提示：所有人離開頻道後，系統將自動清理此空間。")
 
         view = ControlPanelView()
         await new_channel.send(embed=embed, view=view)
