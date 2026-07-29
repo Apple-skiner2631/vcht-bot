@@ -8,6 +8,11 @@ TRIGGER_CHANNEL_ID = 1530974075902759083
 CATEGORY_ID = 1459692616076624087
 STAFF_ROLE_ID = 1459696673239470338
 
+WHITELIST_CHANNEL_IDS = {
+    TRIGGER_CHANNEL_ID,
+    1531993600857079958
+}
+
 intents = discord.Intents.default()
 intents.voice_states = True
 intents.guilds = True
@@ -17,26 +22,25 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 voice_owners = {}
 
-
 E_MENU_SETTINGS = discord.PartialEmoji(name="menu_settings", id=1531236010413920276)
 
-E_NAME     = discord.PartialEmoji(name="e_name",     id=1531235954893783070) 
+E_NAME     = discord.PartialEmoji(name="e_name",     id=1531235954893783070)
 E_LIMIT    = discord.PartialEmoji(name="e_limit",    id=1531235983956377742)
-E_STATUS   = discord.PartialEmoji(name="e_status",   id=1531236041736978563) 
-E_GAME     = discord.PartialEmoji(name="e_game",     id=1531236073768751235) 
+E_STATUS   = discord.PartialEmoji(name="e_status",   id=1531236041736978563)
+E_GAME     = discord.PartialEmoji(name="e_game",     id=1531236073768751235)
 E_LFM      = discord.PartialEmoji(name="e_lfm",      id=1531236105914159154)
 E_BITRATE  = discord.PartialEmoji(name="e_bitrate",  id=1531236135202848938)
-E_REGION   = discord.PartialEmoji(name="e_region",   id=1531236162763620422) 
+E_REGION   = discord.PartialEmoji(name="e_region",   id=1531236162763620422)
 E_TEXT     = discord.PartialEmoji(name="e_text",     id=1531236193503547565)
-E_NSFW     = discord.PartialEmoji(name="e_nsfw",     id=1531236231122391133) 
-E_CLAIM    = discord.PartialEmoji(name="e_claim",    id=1531236263338709093) 
+E_NSFW     = discord.PartialEmoji(name="e_nsfw",     id=1531236231122391133)
+E_CLAIM    = discord.PartialEmoji(name="e_claim",    id=1531237261205573654)
 
-E_LOCK     = discord.PartialEmoji(name="e_lock",     id=1531237058662633492) 
-E_UNLOCK   = discord.PartialEmoji(name="e_unlock",   id=1531237091264954418) 
-E_PERMIT   = discord.PartialEmoji(name="e_permit",   id=1531237123514961931) 
-E_REJECT   = discord.PartialEmoji(name="e_reject",   id=1531237152736678089)
-E_INVITE   = discord.PartialEmoji(name="e_invite",   id=1531237201780805723)
-E_GHOST    = discord.PartialEmoji(name="e_ghost",    id=1531237261205573654)
+E_LOCK     = discord.PartialEmoji(name="e_lock",     id=1531236263338709093)
+E_UNLOCK   = discord.PartialEmoji(name="e_unlock",   id=1531237058662633492)
+E_PERMIT   = discord.PartialEmoji(name="e_permit",   id=1531237091264954418)
+E_REJECT   = discord.PartialEmoji(name="e_reject",   id=1531237123514961931)
+E_INVITE   = discord.PartialEmoji(name="e_invite",   id=1531237152736678089)
+E_GHOST    = discord.PartialEmoji(name="e_ghost",    id=1531237201780805723)
 E_UNGHOST  = discord.PartialEmoji(name="e_unghost",  id=1531237228905496826)
 E_TRANSFER = discord.PartialEmoji(name="e_transfer", id=1531237291639439492)
 
@@ -342,15 +346,17 @@ async def on_voice_state_update(member: discord.Member, before: discord.VoiceSta
         await new_channel.send(embed=embed, view=view)
 
     if before.channel and before.channel.category_id == CATEGORY_ID:
-        if before.channel.id != TRIGGER_CHANNEL_ID:
-            if len(before.channel.members) == 0:
-                channel_id = before.channel.id
-                try:
-                    await before.channel.delete()
-                    if channel_id in voice_owners:
-                        del voice_owners[channel_id]
-                except discord.NotFound:
-                    pass
+        if before.channel.id in WHITELIST_CHANNEL_IDS:
+            return
+
+        if len(before.channel.members) == 0:
+            channel_id = before.channel.id
+            try:
+                await before.channel.delete()
+                if channel_id in voice_owners:
+                    del voice_owners[channel_id]
+            except discord.NotFound:
+                pass
 
 
 if __name__ == "__main__":
